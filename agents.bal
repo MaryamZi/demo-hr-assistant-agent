@@ -1,4 +1,5 @@
 import ballerina/ai;
+import ballerinax/googleapis.calendar;
 
 final ai:Agent hrAgentAgent = check new (
     systemPrompt = {
@@ -196,7 +197,7 @@ None — this is general HR knowledge, not specific to ConnectWave.
 Response: "COBRA stands for the Consolidated Omnibus Budget Reconciliation Act. It's a federal law that lets you continue your employer-sponsored health insurance after you leave a job or lose coverage due to reduced hours. You pay the full premium yourself — both the employee and employer portions — plus a small admin fee.
  
 Coverage typically lasts up to 18 months. If you want to know the specifics of how COBRA works at ConnectWave, just ask and I'll look that up for you."`
-    }, memory = aiShorttermmemory, maxIter = 15, model = openaiModelprovider, tools = [retrieveFromPolicies]
+    }, memory = aiShorttermmemory, maxIter = 15, model = openaiModelprovider, tools = [retrieveFromPolicies, getCompanyCalendarEvents]
 );
 
 # Retrieve information from organizational policies (RAG-based).
@@ -211,3 +212,12 @@ isolated function retrieveFromPolicies(string query) returns string|error {
 }
 
 final ai:ShortTermMemory aiShorttermmemory = check new ();
+
+# Gets company events from the company calendar. 
+# + return - Type of the variable
+@ai:AgentTool
+@display {label: "", iconPath: "https://bcentral-packageicons.azureedge.net/images/ballerinax_googleapis.calendar_3.2.1.png"}
+isolated function getCompanyCalendarEvents() returns stream<calendar:Event, error?>|error {
+    stream<calendar:Event, error?>|error streamCalendarEventError = check calendarClient->getEvents(calendarId);
+    return streamCalendarEventError;
+}
