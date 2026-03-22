@@ -31,17 +31,17 @@ Note: The exact answer depends on what events are in the calendar. The key thing
  
  
 ## 3. RAG + Calendar
-Query: "I want to take the week of July 4th off. How many PTO days do I actually need?"
- 
+Query: "I want to take the week leading up to July 4th off. How many PTO days do I actually need?"
+
 Source: getCompanyCalendarEvents (to check which days are company holidays that week) + Leave and Time-Off Policy, Section 4 (Paid Holidays)
- 
+
 Expected answer:
-The agent should check the calendar to see which days in the July 4th week are already company holidays, then retrieve the holiday and PTO policy to give a complete answer:
- 
-"Good news — you won't need a full 5 days of PTO. Independence Day (July 3, Friday) is a company holiday, so the office is already closed that day. You'd only need 4 PTO days to cover Monday through Thursday.
- 
-If you have any floating holidays left, you could use one to bring it down to 3 PTO days.
- 
+The agent should check the calendar to see that Independence Day is observed on July 3 (Friday), then calculate PTO needs:
+
+"For the week of June 29 - July 3, you'll need to take 4 PTO days. Independence Day is observed on July 3rd (Friday), which is a company holiday, so you only need PTO for Monday through Thursday (June 29 - July 2).
+
+If you have any floating holidays available, you could use one to reduce it to 3 PTO days.
+
 (Leave and Time-Off Policy, Section 4 — Paid Holidays)"
  
  
