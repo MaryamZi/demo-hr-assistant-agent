@@ -34,13 +34,14 @@ Returns the current date and time in RFC 3339 format (e.g., "2026-03-22T14:30:00
 - ALWAYS call this tool when you need to calculate dates, determine weeks, or answer time-sensitive questions.
 - Use it to understand what "this week," "next month," or relative date phrases mean.
 - Essential for accurately calculating PTO needs around holidays or determining which calendar events are upcoming.
+- When interpreting relative date phrases, pay careful attention to directionality (e.g., "leading up to" and "before" mean days prior, not after). Always verify the day-of-week for any date before listing specific dates in your response.
 
 ---
 
 ## When to Use Which Tool
 
 Use getCurrentTime whenever you need to:
-- Calculate or interpret relative dates ("this week," "next Friday," "the week of July 4th")
+- Calculate or interpret relative dates ("this week," "next Friday," "the week before Thanksgiving")
 - Determine which events are upcoming vs. past
 - Make any date-based calculations
 
@@ -52,10 +53,10 @@ Example: "Is the office closed this Friday?" — check the calendar.
 
 Use multiple tools when needed:
 Example: "I'm in Retail — what days can I take off in December?" — call getCurrentTime to understand the current date context, retrieve blackout rules from policy, AND check which days are already company holidays on the calendar.
-Example: "I want to take the week leading up to July 4th off. How many PTO days do I need?" — call getCurrentTime to confirm the current year and context, call getCompanyCalendarEvents to check for holidays that week, and retrieveFromPolicies for holiday policy.
+Example: "How many PTO days do I need for a week off around a holiday?" — call getCurrentTime to anchor date calculations, call getCompanyCalendarEvents to identify which days are company holidays, and optionally retrieveFromPolicies for holiday or floating holiday policy.
 
 Use no tools when the question is general HR knowledge not specific to ConnectWave. Answer from your general knowledge directly.
-Example: "What does COBRA stand for?" — answer directly, no retrieval needed.
+Example: "What is at-will employment?" — answer directly, no retrieval needed.
 Example: "What's the difference between FMLA and short-term disability?" — answer directly.
 Example: "How do I write a resignation letter?" — answer directly.
 
@@ -189,28 +190,25 @@ Agent actions:
 
 Response: "Yes, this Friday (March 27) is marked as an office closure for a company-wide wellness day. Enjoy the long weekend!"
 
-### Example 5: RAG + Calendar (both tools)
-Employee: I want to take the week of July 4th off. How many PTO days do I actually need?
+### Example 5: Calendar + Time + RAG
+Employee: I want to take a week off around Memorial Day. How many PTO days will I need?
 
 Agent actions:
-1. getCompanyCalendarEvents — check July 4th week for company holidays
-2. retrieveFromPolicies("Independence Day holiday PTO") — confirm holiday policy
+1. getCurrentTime — anchor date reasoning to the correct year
+2. getCompanyCalendarEvents — check for company holidays that week
+3. retrieveFromPolicies("holiday PTO floating holiday") — confirm holiday policy
 
-Response: "Good news — you won't need a full 5 days of PTO. Independence Day (July 3, Friday) is a company holiday, so the office is already closed that day. You'd only need 4 PTO days to cover Monday through Thursday.
-
-Also, if you have any floating holidays left, you could use one to bring it down to 3 PTO days.
-
-(Leave and Time-Off Policy, Section 4 — Paid Holidays)"
+Response: Use getCurrentTime to determine the exact dates for that week, check which days are company holidays on the calendar, subtract those from the 5 working days, and tell the employee how many PTO days remain. Mention floating holidays if relevant.
 
 ### Example 6: General knowledge (no tools)
-Employee: What does COBRA stand for?
+Employee: What is at-will employment?
 
 Agent actions:
 None — this is general HR knowledge, not specific to ConnectWave.
 
-Response: "COBRA stands for the Consolidated Omnibus Budget Reconciliation Act. It's a federal law that lets you continue your employer-sponsored health insurance after you leave a job or lose coverage due to reduced hours. You pay the full premium yourself — both the employee and employer portions — plus a small admin fee.
+Response: "At-will employment means that either the employer or the employee can end the employment relationship at any time, for any lawful reason, with or without notice. Most U.S. states follow at-will employment by default.
 
-Coverage typically lasts up to 18 months. If you want to know the specifics of how COBRA works at ConnectWave, just ask and I'll look that up for you."`
+There are exceptions — employers can't fire someone for discriminatory reasons, retaliation, or in violation of a contract. If you want to know how this applies to your role at ConnectWave, I can look into that for you."`
     }, memory = aiShorttermmemory, maxIter = 15, model = openaiModelprovider, tools = [retrieveFromPolicies, getCompanyCalendarEvents, getCurrentTime]
 );
 
@@ -227,12 +225,15 @@ isolated function retrieveFromPolicies(string query) returns string|error {
 
 final ai:ShortTermMemory aiShorttermmemory = check new ();
 
-# Gets company events from the company calendar. 
+# Gets events. 
+# + q - Optional search query to filter events.
+# + timeMin - Optional minimum time for events to retrieve (RFC 3339 format).
+# + timeMax - Optional maximum time for events to retrieve (RFC 3339 format).
 # + return - Type of the variable
 @ai:AgentTool
 @display {label: "", iconPath: "https://bcentral-packageicons.azureedge.net/images/ballerinax_googleapis.calendar_3.2.1.png"}
-isolated function getCompanyCalendarEvents() returns stream<calendar:Event, error?>|error {
-    stream<calendar:Event, error?>|error streamCalendarEventError = check calendarClient->getEvents(calendarId);
+isolated function getCompanyCalendarEvents(string? q = (), string? timeMin = (), string? timeMax = ()) returns stream<calendar:Event, error?>|error {
+    stream<calendar:Event, error?> streamCalendarEventError = check calendarClient->getEvents(calendarId, {timeMin: timeMin, timeMax: timeMax});
     return streamCalendarEventError;
 }
 

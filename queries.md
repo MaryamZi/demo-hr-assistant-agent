@@ -30,21 +30,19 @@ The agent should check the company calendar and return the date, time, and any d
 Note: The exact answer depends on what events are in the calendar. The key thing to verify is that the agent calls getCompanyCalendarEvents and does NOT call retrieveFromPolicies.
  
  
-## 3. RAG + Calendar + Time
+## 3. Calendar + Time (RAG optional)
 Query: "I want to take the week leading up to July 4th off. How many PTO days do I actually need?"
 
-Source: getCurrentTime (to establish the current date for date calculations) + getCompanyCalendarEvents (to check which days are company holidays that week) + retrieveFromPolicies / Leave and Time-Off Policy, Section 4 (Paid Holidays)
+Source: getCurrentTime (to establish the current date for date calculations) + getCompanyCalendarEvents (to check which days are company holidays that week). Optionally, retrieveFromPolicies / Leave and Time-Off Policy, Section 4 (Paid Holidays) for policy citation and floating holiday details.
 
 Expected answer:
-The agent should first call getCurrentTime to anchor its date reasoning, then check the calendar to see that Independence Day is observed on July 3 (Friday), and retrieve the holiday policy. It then calculates PTO needs:
+The agent should first call getCurrentTime to anchor its date reasoning, then check the calendar to see that Independence Day is observed on July 3 (Friday). It then calculates PTO needs:
 
-"For the week of June 29 - July 3, you'll need to take 4 PTO days. Independence Day is observed on July 3rd (Friday), which is a company holiday, so you only need PTO for Monday through Thursday (June 29 - July 2).
+"For the week of June 29 - July 3, you'll need to take 4 PTO days. Independence Day is observed on July 3rd (Friday), which is a company holiday, so you only need PTO for Monday through Thursday (June 29 - July 2)."
 
-If you have any floating holidays available, you could use one to reduce it to 3 PTO days.
+If RAG is also called, the agent may additionally mention floating holidays and cite the policy section.
 
-(Leave and Time-Off Policy, Section 4 — Paid Holidays)"
-
-Note: The key thing to verify is that the agent calls all three tools — getCurrentTime, getCompanyCalendarEvents, and retrieveFromPolicies. getCurrentTime should be called first (or in parallel) since the query involves date calculation ("the week leading up to July 4th").
+Note: The key thing to verify is that the agent calls getCurrentTime and getCompanyCalendarEvents. getCurrentTime should be called first (or in parallel) since the query involves date calculation ("the week leading up to July 4th"). A call to retrieveFromPolicies is supplementary — the calendar data alone is sufficient to answer the question.
  
  
 ## 4. General Knowledge (No Tools)

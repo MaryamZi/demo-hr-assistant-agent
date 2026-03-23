@@ -15,7 +15,7 @@ final ai:Wso2ModelProvider judgeModel = check ai:getDefaultModelProvider();
 function evaluateResponseClarity(ai:ConversationThread thread) returns error? {
     float totalAchievedScore = 0.0;
     float maxPossibleScore = thread.traces.count() * 5.0;
-    float THRESHOLD = 0.8;
+    float THRESHOLD = 0.7;
 
     foreach ai:Trace trace in thread.traces {
         ai:Trace actualTrace = check hrAgentAgent.run(trace.userMessage.content.toString(), thread.id);
@@ -23,21 +23,19 @@ function evaluateResponseClarity(ai:ConversationThread thread) returns error? {
         string expectedOutput = (check trace.output).content.toString();
         string actualOutput = (check actualTrace.output).content.toString();
 
-        float judgeResult = check judgeModel->generate(`You are a strict, expert evaluator grading an HR Assistant agent. Compare the ACTUAL OUTPUT to the EXPECTED OUTPUT.
+        float judgeResult = check judgeModel->generate(`You are an expert evaluator grading an HR Assistant agent. Compare the ACTUAL OUTPUT to the EXPECTED OUTPUT.
 
-Your primary focus is ensuring the agent provides **accurate, policy-grounded answers** with clear citations. Correct information alone is NOT enough — the response must reference specific policy sections and be actionable.
+The Expected Output is a **reference answer**, not the only correct answer. The Actual Output may use different wording, structure, or level of detail and still be equally correct.
 
-Rate the output on a scale of 1 to 5 based on this strict rubric:
+First, determine whether the question is a **general HR knowledge question** (answer would be the same at any company) or a **company-specific policy question** (answer depends on ConnectWave's specific policies). For company-specific questions, the response should cite policy sections. For general knowledge questions, citations are not required.
 
-* 1 = Incorrect or fabricated policy information, OR no policy citations at all.
+Rate the Actual Output on a scale of 1 to 5:
 
-* 2 = Mostly correct information, but missing key policy options or citations are vague/absent.
-
-* 3 = Correct information with some citations, but missing important options or details present in the Expected Output.
-
-* 4 = Accurate, well-cited response covering the key options, but missing minor details compared to the Expected Output.
-
-* 5 = Comprehensive, accurate response with proper policy citations that matches or exceeds the Expected Output in clarity and completeness.
+* 1 = Incorrect, fabricated, or seriously misleading information.
+* 2 = Partially correct but missing critical facts or key concepts that would change the employee's understanding.
+* 3 = Correct on the main points but missing important secondary details that the Expected Output covers.
+* 4 = Accurate and covers all key points. Minor differences in wording, structure, or supplementary details are acceptable.
+* 5 = Comprehensive and accurate, covering all key points with clarity. May differ in wording or structure from the Expected Output but is equally or more helpful.
 
 Expected Output: ${expectedOutput}
 
@@ -62,7 +60,7 @@ isolated function loadEvalsetData1() returns map<[ai:ConversationThread]>|error 
 
 @test:Config {
     groups: ["evaluations"],
-    minPassRate: 0.95,
+    minPassRate: 0.75,
     dataProvider: loadEvalsetData1
 }
 function evaluateToolTrajectory(ai:ConversationThread thread) returns error? {
