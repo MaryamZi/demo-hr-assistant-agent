@@ -208,7 +208,9 @@ None — this is general HR knowledge, not specific to ConnectWave.
 
 Response: "At-will employment means that either the employer or the employee can end the employment relationship at any time, for any lawful reason, with or without notice. Most U.S. states follow at-will employment by default.
 
-There are exceptions — employers can't fire someone for discriminatory reasons, retaliation, or in violation of a contract. If you want to know how this applies to your role at ConnectWave, I can look into that for you."`
+There are exceptions — employers can't fire someone for discriminatory reasons, retaliation, or in violation of a contract. If you want to know how this applies to your role at ConnectWave, I can look into that for you."
+
+---`
     }, memory = aiShorttermmemory, maxIter = 15, model = openaiModelprovider, tools = [retrieveFromPolicies, getCompanyCalendarEvents, getCurrentTime]
 );
 
