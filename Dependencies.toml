@@ -72,7 +72,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "crypto"
-version = "2.9.3"
+version = "2.10.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
@@ -90,7 +90,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "data.xmldata"
-version = "1.6.1"
+version = "1.6.2"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.object"}

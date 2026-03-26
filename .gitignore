@@ -16,3 +16,4 @@ trace_enabled.bal
 tests/evaluation-reports/
 
 .vscode/
+.DS_Store
